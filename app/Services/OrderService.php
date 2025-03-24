@@ -4,31 +4,86 @@ namespace App\Services;
 
 use App\Services\Interfaces\OrderServiceInterface;
 use App\Repositories\Interfaces\OrderRepositoryInterface as OrderRepository;
-use App\Repositories\Interfaces\ProductVariantRepositoryInterface  as ProductVariantRepository;
-use App\Repositories\Interfaces\ProductRepositoryInterface  as ProductRepository;
+use App\Repositories\Interfaces\ProductVariantRepositoryInterface as ProductVariantRepository;
+use App\Repositories\Interfaces\ProductRepositoryInterface as ProductRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 
-/**
- * Class CustomerService
- * @package App\Services
- */
 class OrderService extends BaseService implements OrderServiceInterface 
 {
     protected $orderRepository;
     protected $productVariantRepository;
     protected $productRepository;
-    
 
     public function __construct(
         OrderRepository $orderRepository,
         ProductVariantRepository $productVariantRepository,
-        ProductRepository $productRepository,
-    ){
+        ProductRepository $productRepository
+    ) {
         $this->orderRepository = $orderRepository;
         $this->productVariantRepository = $productVariantRepository;
         $this->productRepository = $productRepository;
+    }
+
+    public function update($request)
+    {
+        DB::beginTransaction();
+        try {
+            $id = $request->input('id');
+            $payload = $request->input('payload');
+            $order = $this->orderRepository->findById($id);
+
+            // Nếu trạng thái confirm thay đổi thành 'confirmed', trừ số lượng
+            if (isset($payload['confirm']) && $payload['confirm'] === 'confirmed' && $order->confirm !== 'confirmed') {
+                $this->deductProductQuantity($order);
+            }
+
+            $this->orderRepository->update($id, $payload);
+           
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Lỗi khi cập nhật đơn hàng: " . $e->getMessage());
+            echo $e->getMessage(); die();
+            return false;
+        }
+    }
+
+    public function updatePaymentOnline($payload, $order)
+    {
+        DB::beginTransaction();
+        try {
+            $this->orderRepository->update($order->id, $payload);
+           
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error($e->getMessage());
+            echo $e->getMessage(); die();
+            return false;
+        }
+    }
+
+    private function deductProductQuantity($order)
+    {
+        $order->load('products');
+        Log::info("Số sản phẩm trong đơn hàng: " . $order->products->count());
+
+        foreach ($order->products as $product) {
+            $orderedQty = $product->pivot->qty;
+            Log::info("Sản phẩm ID: {$product->id}, Số lượng đặt: {$orderedQty}, Số lượng hiện tại: {$product->quantity}");
+
+            if ($product->quantity < $orderedQty) {
+                throw new \Exception("Sản phẩm {$product->name} không đủ số lượng (còn: {$product->quantity}, yêu cầu: {$orderedQty}).");
+            }
+
+            $newQuantity = $product->quantity - $orderedQty;
+            Log::info("Cập nhật số lượng mới cho sản phẩm ID {$product->id}: {$newQuantity}");
+            $this->productRepository->update($product->id, ['quantity' => $newQuantity]);
+        }
     }
 
     

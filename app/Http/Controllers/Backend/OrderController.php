@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Services\Interfaces\OrderServiceInterface  as OrderService;
+use App\Services\Interfaces\OrderServiceInterface as OrderService;
 use App\Repositories\Interfaces\OrderRepositoryInterface as OrderRepository;
 use App\Repositories\Interfaces\ProvinceRepositoryInterface as ProvinceRepository;
-
 
 class OrderController extends Controller
 {
@@ -18,15 +17,15 @@ class OrderController extends Controller
     public function __construct(
         OrderService $orderService,
         OrderRepository $orderRepository,
-        ProvinceRepository $provinceRepository,
-    ){
+        ProvinceRepository $provinceRepository
+    ) {
         $this->orderService = $orderService;
         $this->orderRepository = $orderRepository;
         $this->provinceRepository = $provinceRepository;
     }
 
-    public function index(Request $request){
-
+    public function index(Request $request)
+    {
         $this->authorize('modules', 'order.index');
         $orders = $this->orderService->paginate($request);
         $config = [
@@ -53,7 +52,8 @@ class OrderController extends Controller
         ));
     }
 
-    public function detail(Request $request, $id){
+    public function detail(Request $request, $id)
+    {
         $order = $this->orderRepository->getOrderById($id, ['products']);
         $order = $this->orderService->getOrderItemImage($order);
 
@@ -74,8 +74,22 @@ class OrderController extends Controller
             'template',
             'config',
             'order',
-            'provinces',
+            'provinces'
         ));
     }
 
+    public function update(Request $request, $id)
+    {
+        $this->authorize('modules', 'order.update');
+
+        $payload = $request->only(['confirm', 'payment', 'delivery']); // Lấy các trường cần cập nhật
+        $request->merge(['id' => $id, 'payload' => $payload]);
+
+        $success = $this->orderService->update($request);
+
+        if ($success) {
+            return redirect()->route('order.index')->with('success', 'Cập nhật đơn hàng thành công');
+        }
+        return redirect()->route('order.index')->with('error', 'Cập nhật đơn hàng thất bại');
+    }
 }

@@ -197,6 +197,7 @@ class VnpayController extends FrontendController
             $returnData['RspCode'] = '99';
             $returnData['Message'] = 'Unknow error';
         }
+
         //Trả lại VNPAY theo định dạng JSON
         echo json_encode($returnData);
                 

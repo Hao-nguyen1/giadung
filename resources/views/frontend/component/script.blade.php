@@ -1,12 +1,12 @@
 @php
     $coreScript = [
-        'backend/js/plugins/toastr/toastr.min.js',
-        'frontend/resources/plugins/wow/dist/wow.min.js',
-        'frontend/resources/uikit/js/uikit.min.js',
-        'frontend/resources/uikit/js/components/sticky.min.js',
-        'frontend/resources/uikit/js/components/lightbox.min.js',
-        'frontend/core/plugins/jquery-nice-select-1.1.0/js/jquery.nice-select.min.js',
-        'frontend/resources/function.js'
+        'public/backend/js/plugins/toastr/toastr.min.js',
+        'public/frontend/resources/plugins/wow/dist/wow.min.js',
+        'public/frontend/resources/uikit/js/uikit.min.js',
+        'public/frontend/resources/uikit/js/components/sticky.min.js',
+        'public/frontend/resources/uikit/js/components/lightbox.min.js',
+        'public/frontend/core/plugins/jquery-nice-select-1.1.0/js/jquery.nice-select.min.js',
+        'public/frontend/resources/function.js'
     ];
     if(isset($config['js'])){
         foreach($config['js'] as $key => $val){

@@ -21,6 +21,7 @@ class Product extends Model
         'user_id',
         'product_catalogue_id',
         'price',
+        'quantity',
         'made_in',
         'code',
         'attributeCatalogue',

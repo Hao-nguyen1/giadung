@@ -1,7 +1,3 @@
-@php
-    $query= base64_encode(http_build_query(request()->query()));
-    $queryUrl = rtrim($query,'=');
-@endphp
 <table class="table table-striped table-bordered">
     <thead>
     <tr>
@@ -10,7 +6,7 @@
         </th>
         <th style="width:700px;">{{ __('messages.tableName') }}</th>
         @include('backend.dashboard.component.languageTh')
-        <th style="width:80px;" class="text-center">{{ __('messages.tableOrder') }}</th>
+        <th style="width:80px;" class="text-center">{{ __('messages.tableQuantity') }}</th>
         <th class="text-center" style="width:100px;">{{ __('messages.tableStatus') }}</th>
         <th class="text-center" style="width:100px;">{{ __('messages.tableAction') }}</th>
     </tr>
@@ -37,13 +33,12 @@
                                 @endforeach
                                 @endforeach
                             </div>
-                            
                         </div>
                     </div>
                 </td>
                 @include('backend.dashboard.component.languageTd', ['model' => $product, 'modeling' => 'Product'])
                 <td>
-                    <input type="text" name="order" value="{{ $product->order }}" class="form-control sort-order text-right" data-id="{{ $product->id }}" data-model="{{ $config['model'] }}">
+                    <input type="text" name="quantity" value="{{ $product->quantity }}" class="form-control text-right" readonly>
                 </td>
                 <td class="text-center js-switch-{{ $product->id }}"> 
                     <input type="checkbox" value="{{ $product->publish }}" class="js-switch status " data-field="publish" data-model="{{ $config['model'] }}" {{ ($product->publish == 2) ? 'checked' : '' }} data-modelId="{{ $product->id }}" />
@@ -57,4 +52,4 @@
         @endif
     </tbody>
 </table>
-{{  $products->links('pagination::bootstrap-4') }}
+{{ $products->links('pagination::bootstrap-4') }}

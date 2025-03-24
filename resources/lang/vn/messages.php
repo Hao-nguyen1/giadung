@@ -345,7 +345,7 @@ return [
     'tableStatus' => 'Tình Trạng',
     'tableAction' => 'Thao tác',
     'tableName' => 'Tiêu đề',
-    'tableOrder' => 'Sắp xếp',
+    'tableQuantity' => 'Số lượng',
     'tableGroup' => 'Nhóm hiển thị:',
     'deleteButton' => 'Xóa dữ liệu',
     'tableHeading' => 'Thông tin chung',
